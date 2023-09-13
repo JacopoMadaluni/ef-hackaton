@@ -8,9 +8,6 @@ dotenv.config();
 const env = "main"
 
 export = async () => {
-  // ------------------------------------------------------------
-  // Create an Azure resource group
-  // ------------------------------------------------------------
   const resourceGroup = new azure.core.ResourceGroup(
     "eft-resource-group",
     {
@@ -75,7 +72,7 @@ export = async () => {
       resourceGroupName: resourceGroup.name,
       serverFarmId: servicePlan.id,
       siteConfig: {
-        alwaysOn: false,
+        alwaysOn: true,
         nodeVersion: "18.14.2",
         linuxFxVersion: "Node|18",
       },
