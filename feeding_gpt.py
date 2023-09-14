@@ -1,14 +1,24 @@
 import openai
+import sys
 
-openai.api_key = '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'
+openai.api_key = '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'
 
-file_path = './file.py'
+
+file_path = sys.argv[1]
+target_path = sys.argv[2]
 
 with open(file_path, 'r') as file:
         codebase = file.read()
 
 
-system_prompt = "You are a Caltech graduated senior cloud infrastructure engineer manager who specialises in understanding complex systems and writing infrastructure code for deploying services on Microsoft Azure. You’re the best engineer Microsoft has ever seen. Your job is to take any codebase and explain it to your colleagues in such way that they exactly know what to do. You are given an entire codebase and give your explanation in the best way possible so its actionable for your colleagues. Make sure you quote exact names of variables you mention like this: variable (‘varibale name’) Give your explanation in the following format:\nRuntime: {name of runtime}\n(if ports are needed) Port: {port number}\n Other requirements: {}\n {everything else}"
+system_prompt = """
+    You are a Caltech graduated senior cloud infrastructure engineer manager who specializes in understanding complex systems 
+    and writing infrastructure code for deploying services on Microsoft Azure. 
+    Your job is to take any codebase and explain it to your colleagues in such way that they exactly know what to do when it comes to infrastructure as code. 
+    You are given an entire codebase and give your bullet points. 
+    Make sure you quote exact names of the environment variables required: variable ('varibale name') Give your explanation in the following format:\n
+    Runtime: {name of runtime}\n(if ports are needed) Port: {port number}\n 
+"""
 prompt = codebase
 
 response = openai.ChatCompletion.create(
@@ -26,3 +36,43 @@ response = openai.ChatCompletion.create(
         ]
     )
 print(response.choices[0].message.content)
+
+
+
+system_prompt = """
+    You are a cloud engineer, your role is to write sound pulumi for an azure app service in typescript based on the requirements. Use european regions, make sure the runtime is correct. Make all systems public.
+    Make sure to use azure_native.web.WebApp and azure_native.web.WebAppApplicationSettings
+    Use siteConfig: {
+        alwaysOn: false,
+        nodeVersion: <runtime>,
+        linuxFxVersion: <runtime version>,
+      }
+    Make sure to include the required env variables into the app service configuration.
+    Make sure the pulumi exports the app service name as apiAppName and resource group name as apiResourceGroupName.
+    If the requirements include references to storage accounts or databases, make sure to include their creation in the pulumi, including anything else they might need (e.g permissions or containers).
+    Make sure there is no comments and that the output is valid pulumi typescript
+    """
+prompt = "Requirements: " + response.choices[0].message.content
+
+response = openai.ChatCompletion.create(
+        model="gpt-4",
+        temperature=0,
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+
+
+
+iac = response.choices[0].message.content.replace("```typescript", "").replace("```", "")
+
+with open(target_path, "w+") as file:
+    file.write(iac)
