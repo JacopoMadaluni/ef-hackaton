@@ -1,7 +1,6 @@
 import openai
 import sys
 
-openai.api_key = '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'
 
 
 file_path = sys.argv[1]
@@ -48,6 +47,8 @@ system_prompt = """
         linuxFxVersion: <runtime version>,
       }
     Make sure to include the required env variables into the app service configuration.
+    Prefix all names with: ef
+    Make sure all names are very short
     Make sure the pulumi exports the app service name as apiAppName and resource group name as apiResourceGroupName.
     If the requirements include references to storage accounts or databases, make sure to include their creation in the pulumi, including anything else they might need (e.g permissions or containers).
     Make sure there is no comments and that the output is valid pulumi typescript.
