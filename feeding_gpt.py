@@ -1,7 +1,7 @@
 import openai
 import sys
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 
 file_path = sys.argv[1]
@@ -50,7 +50,21 @@ system_prompt = """
     Make sure to include the required env variables into the app service configuration.
     Make sure the pulumi exports the app service name as apiAppName and resource group name as apiResourceGroupName.
     If the requirements include references to storage accounts or databases, make sure to include their creation in the pulumi, including anything else they might need (e.g permissions or containers).
-    Make sure there is no comments and that the output is valid pulumi typescript
+    Make sure there is no comments and that the output is valid pulumi typescript.
+    Keep in mind this is the way you create storage connection strings:
+    const storageAccountKeys = pulumi
+        .all([storageAccount.name, resourceGroup.name])
+        .apply(async ([accountName, resourceGroupName]) => {
+        return await azure_native.storage.listStorageAccountKeys({
+            accountName,
+            resourceGroupName,
+        });
+     });
+    STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=" +
+      storageAccount.name +
+      ";AccountKey=" +
+      storageAccountKeys.keys[0].value +
+      ";EndpointSuffix=core.windows.net",
     """
 prompt = "Requirements: " + response.choices[0].message.content
 
